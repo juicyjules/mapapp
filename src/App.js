@@ -1,5 +1,5 @@
-import { version, Component } from 'inferno';
-import Logo from './logo';
+import { Component } from 'inferno';
+import Map from './Map';
 import './App.css';
 
 class App extends Component {
@@ -7,12 +7,9 @@ class App extends Component {
     return (
       <div className="App">
         <header className="App-header">
-          <Logo width="80" height="80" />
-          <p>{`Welcome to Inferno ${version}`}</p>
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
+          <p> Mapapp</p>
         </header>
+        <Map></Map>
       </div>
     );
   }
