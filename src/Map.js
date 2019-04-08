@@ -44,7 +44,6 @@ class Map extends Component {
             }
         }
         this.state.map.on('click', this.addMarker.bind(this));
-        console.log(this);
     }
 
     markersToPos(){
@@ -62,11 +61,9 @@ class Map extends Component {
         var markers = this.state.markers;
         var marker = window.L.marker(pos).addTo(this.state.map);
         marker.on("click", (function(e){
-            console.log(e)
             e.target._map.removeLayer(e.target);
             this.removePointFromPos(e.target._latlng)
             this.removeMarkerFromMarkers(e.target)
-            console.log(this.state)
         }).bind(this));
         markers.push(marker);
         var posString = pos.lat.toString().substring(0,6)+", "+pos.lng.toString().substring(0,6)

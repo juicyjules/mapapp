@@ -9,6 +9,8 @@
     min-height: 90vh;
     font-size: calc(10px + 2vmin);
     color: white;
+    position: fixed;
+    width:100%;
 }
 .footer {
     position: fixed;
