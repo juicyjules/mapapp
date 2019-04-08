@@ -29,10 +29,15 @@ class Map extends Component {
     }
 
     initMap(){
+        navigator.geolocation.getCurrentPosition((function(location) {
+            this.state.map.panTo(new window.L.LatLng(location.coords.latitude, location.coords.longitude));
+          }).bind(this));
+          
         var osmUrl='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
         var osmAttrib='Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors';
-        var osm = new window.L.TileLayer(osmUrl, {minZoom: 0, maxZoom: 20, attribution: osmAttrib});
+        var osm = new window.L.TileLayer(osmUrl, {minZoom: 2, maxZoom: 20, attribution: osmAttrib});
         this.state.map.addLayer(osm);
+
         if(this.state.positions !=null){
             for(let pos of this.state.positions){
                 this.paintMarker(pos);
@@ -49,14 +54,20 @@ class Map extends Component {
     }
 
     addMarker(e) {
-        console.log(this.state.positions)
-        this.deleteAllMarkers();
-        var marker = this.paintMarker(e.latlng)
+        //this.deleteAllMarkers();
+        var marker = this.paintMarker(e.latlng);
     }
 
     paintMarker(pos) {
         var markers = this.state.markers;
         var marker = window.L.marker(pos).addTo(this.state.map);
+        marker.on("click", (function(e){
+            console.log(e)
+            e.target._map.removeLayer(e.target);
+            this.removePointFromPos(e.target._latlng)
+            this.removeMarkerFromMarkers(e.target)
+            console.log(this.state)
+        }).bind(this));
         markers.push(marker);
         var posString = pos.lat.toString().substring(0,6)+", "+pos.lng.toString().substring(0,6)
         this.setState({
@@ -73,8 +84,19 @@ class Map extends Component {
         }  
         this.setState({
             markers: [],
-            point: "Nirgends"
-        });
+            positions: [],
+            posString: ""
+        },this.saveMarkers);
+    }
+    removeMarkerFromMarkers(marker){
+        this.setState(prevState => ({
+            markers: prevState.markers.filter( (t) => { return t!= marker})
+          }))
+    }
+    removePointFromPos(point) {
+        this.setState(prevState => ({
+            positions: prevState.positions.filter( (t) => { return t.lat != point.lat && t.lng != t.lnt})
+          }))
     }
     addPointToPos(point) {
         this.setState(prevState => ({
@@ -82,8 +104,7 @@ class Map extends Component {
           }))
     }
     savePosition(){
-        //this.markersToPos();
-        this.addPointToPos(this.state.point)
+        this.markersToPos();
         console.log(this.state)
         this.saveMarkers();
     }
@@ -101,18 +122,18 @@ class Map extends Component {
                     <p> Jetzige Position:   {this.state.posString}</p>
                 </div>
                 <div class="pure-u-7-24"/>
-                <div class="pure-u-10-24">
-                    { this.state && this.state.positions &&
-                    <Cell positions={this.state.positions} onClick={this.paintMarker.bind(this)}/>
+                <div class="pure-u-10-24 hide-overflow">
+                    { this.state && this.state.positions && this.state.map &&
+                    <Cell positions={this.state.positions} onClick={this.paintMarker.bind(this)} map={this.state.map} />
                     }
                 </div>
                 <div class="pure-u-7-24"/>
             </div>
             <div class="footer pure-g">
                 <div class="pure-u-2-5">
-                    <button class="pure-button pure-button-primary button-error" onClick={this.deleteAllMarkers}>Löschen</button>
+                    <button class="pure-button pure-button-primary button-error" onClick={this.deleteAllMarkers}>del all</button>
                 </div>
-                <div class="pure-u-1-5"></div>
+                <div class="pure-u-1-5 back"></div>
                 <div class="pure-u-2-5">
                     <button class="pure-button pure-button-primary button-success" onClick={this.savePosition}>Save</button>
                 </div>

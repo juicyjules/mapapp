@@ -1,3 +1,6 @@
 .pure-menu {
     height:20vh;
 }
+::-webkit-scrollbar {
+    display:none;
+  }

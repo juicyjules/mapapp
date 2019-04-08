@@ -4,9 +4,9 @@ import './Cell.css';
 class Cell extends Component {
     constructor(props) {
         super(props)
-        console.log(props)
         this.state = {
-            data: props.positions
+            data: props.positions,
+            map: props.map
         }
     }
 
@@ -16,9 +16,7 @@ class Cell extends Component {
     componentWillUnmount(){
       
     }
-    click(pos){
 
-    }
     render() {
       return (
         <div class="pure-menu pure-menu-scrollable">

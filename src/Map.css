@@ -14,5 +14,13 @@
     position: fixed;
     bottom:0px;
     padding-bottom:1em;
+    padding-top:0.5em;
     width: 100%;
+    background-color: #282c34;
+}
+.back {
+    z-index:-9999;
+}
+.hide-overflow {
+    overflow:hidden;
 }
