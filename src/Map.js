@@ -12,27 +12,26 @@ class Map extends Component {
         }
         this.deleteAllMarkers = this.deleteAllMarkers.bind(this)
         this.savePosition = this.savePosition.bind(this)
-
-    }
+        this.setCurrentPos = this.setCurrentPos.bind(this)
+    }   
 
     componentDidMount() {
         this.setState({
             map:  window.L.map('map1').setView([51.505, -0.09], 13),
             popup: window.L.popup(),
             positions:JSON.parse(localStorage.getItem("markers")),
-            markers: []
+            markers: [],
+            curMarker: null
           },this.initMap);
        
     }
     componentWillUnmount(){
         console.log(this.state)
     }
-
+   
     initMap(){
-        navigator.geolocation.getCurrentPosition((function(location) {
-            this.state.map.panTo(new window.L.LatLng(location.coords.latitude, location.coords.longitude));
-          }).bind(this));
-          
+        setInterval(this.setCurrentPos,1000);
+
         var osmUrl='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
         var osmAttrib='Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors';
         var osm = new window.L.TileLayer(osmUrl, {minZoom: 2, maxZoom: 20, attribution: osmAttrib});
@@ -43,7 +42,7 @@ class Map extends Component {
                 this.paintMarker(pos);
             }
         }
-        this.state.map.on('click', this.addMarker.bind(this));
+        //this.state.map.on('click', this.addMarker.bind(this));
     }
 
     markersToPos(){
@@ -52,11 +51,32 @@ class Map extends Component {
         this.setState({positions:positions});
     }
 
+    setCurrentPos(){
+        navigator.geolocation.getCurrentPosition((function(location) {
+            var lat = location.coords.latitude;
+            var lng = location.coords.longitude;
+            this.state.map.panTo(new window.L.LatLng(lat, lng));
+            this.addPosMarker({lat:lat,lng:lng})
+        }).bind(this));
+    }
+
     addMarker(e) {
-        //this.deleteAllMarkers();
         var marker = this.paintMarker(e.latlng);
     }
 
+    addPosMarker(e) {
+        if(this.state.curMarker!=null){
+            this.state.map.removeLayer(this.state.curMarker);
+        }
+        var marker = this.paintMarker(e);
+        this.setState({
+            curMarker: marker
+            });
+    }
+
+    paintMarker(pos){
+
+    }
     paintMarker(pos) {
         var markers = this.state.markers;
         var marker = window.L.marker(pos).addTo(this.state.map);
@@ -101,8 +121,7 @@ class Map extends Component {
           }))
     }
     savePosition(){
-        this.markersToPos();
-        console.log(this.state)
+        this.addPointToPos(this.state.curMarker._latlng)
         this.saveMarkers();
     }
     saveMarkers(){
