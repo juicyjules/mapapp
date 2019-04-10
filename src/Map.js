@@ -30,6 +30,11 @@ class Map extends Component {
     }
    
     initMap(){
+        navigator.geolocation.getCurrentPosition((function(location) {
+            var lat = location.coords.latitude;
+            var lng = location.coords.longitude;
+            this.state.map.panTo(new window.L.LatLng(lat, lng));
+        }).bind(this));
         setInterval(this.setCurrentPos,1000);
 
         var osmUrl='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
@@ -55,7 +60,6 @@ class Map extends Component {
         navigator.geolocation.getCurrentPosition((function(location) {
             var lat = location.coords.latitude;
             var lng = location.coords.longitude;
-            this.state.map.panTo(new window.L.LatLng(lat, lng));
             this.addPosMarker({lat:lat,lng:lng})
         }).bind(this));
     }
@@ -110,6 +114,13 @@ class Map extends Component {
             markers: prevState.markers.filter( (t) => { return t!= marker})
           }))
     }
+
+    addMarkerToMarkers(marker){
+        this.setState(prevState => ({
+            markers: [...prevState.positions, marker]
+        }));
+    }
+
     removePointFromPos(point) {
         this.setState(prevState => ({
             positions: prevState.positions.filter( (t) => { return t.lat != point.lat && t.lng != t.lnt})
@@ -122,6 +133,10 @@ class Map extends Component {
     }
     savePosition(){
         this.addPointToPos(this.state.curMarker._latlng)
+        this.addMarkerToMarkers(this.state.curMarker);
+        this.setState({
+            curMarker:null
+        })
         this.saveMarkers();
     }
     saveMarkers(){
