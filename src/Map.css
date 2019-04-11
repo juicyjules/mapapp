@@ -26,3 +26,6 @@
 .hide-overflow {
     overflow:hidden;
 }
+.centered {
+    margin:auto;
+}

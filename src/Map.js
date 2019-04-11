@@ -13,6 +13,8 @@ class Map extends Component {
         this.deleteAllMarkers = this.deleteAllMarkers.bind(this)
         this.savePosition = this.savePosition.bind(this)
         this.setCurrentPos = this.setCurrentPos.bind(this)
+        this.toggleAddOwn = this.toggleAddOwn.bind(this)
+        this.panToPos = this.panToPos.bind(this)
     }   
 
     componentDidMount() {
@@ -22,7 +24,8 @@ class Map extends Component {
             positions:JSON.parse(localStorage.getItem("markers")),
             markers: [],
             curMarker: null,
-            markers2Save: []
+            markers2Save: [],
+            setOwn: false
           },this.initMap);
        
     }
@@ -48,9 +51,22 @@ class Map extends Component {
                 this.paintMarker(pos);
             }
         }
-        this.state.map.on('click', this.addMarker.bind(this));
     }
 
+    panToPos(){
+        this.state.map.panTo(this.state.curMarker._latlng);
+    }
+    toggleAddOwn(){
+        var setOwnNew = !this.state.setOwn
+        if(setOwnNew){
+            this.state.map.on('click', this.addMarker.bind(this));
+        } else {
+            this.state.map.off('click',this.addMarker.bind(this));
+        }
+        this.setState({
+            setOwn: setOwnNew
+        })
+    }
     markersToPos(){
         var markers = this.state.markers;
         var positions = markers.map((marker) => marker._latlng);
@@ -199,19 +215,24 @@ class Map extends Component {
                     <div id="map1"></div>
                 </div>
                 <div class="pure-u-1">
-                    <p> Jetzige Position:   {this.state.posString}</p>
+                    <p> Jetzige Position:   {this.state.posString} <button class="pure-button pure-button-primary" onClick={this.panToPos}>Go Here</button> </p>
                 </div>
-                <div class="pure-u-7-24"/>
+                <div class="pure-u-7-24">
+                    <label for="setOwn" class="pure-checkbox">
+                        <input id="setOwn" type="checkbox" value={this.state.setOwn} onChange={this.toggleAddOwn} />Set position on click
+                    </label>
+                </div>
                 <div class="pure-u-10-24 hide-overflow">
                     { this.state && this.state.positions && this.state.map &&
                     <Cell positions={this.state.positions} onClick={this.paintMarker.bind(this)} map={this.state.map} />
                     }
                 </div>
-                <div class="pure-u-7-24"/>
+                <div class="pure-u-7-24">
+                </div>
             </div>
             <div class="footer pure-g">
                 <div class="pure-u-2-5">
-                    <button class="pure-button pure-button-primary button-error" onClick={this.deleteAllMarkers}>del all</button>
+                    <button class="pure-button pure-button-primary button-error" onClick={this.deleteAllMarkers}>Remove all</button>
                 </div>
                 <div class="pure-u-1-5 back"></div>
                 <div class="pure-u-2-5">
