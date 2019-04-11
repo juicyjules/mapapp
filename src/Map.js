@@ -21,7 +21,8 @@ class Map extends Component {
             popup: window.L.popup(),
             positions:JSON.parse(localStorage.getItem("markers")),
             markers: [],
-            curMarker: null
+            curMarker: null,
+            markers2Save: []
           },this.initMap);
        
     }
@@ -47,13 +48,23 @@ class Map extends Component {
                 this.paintMarker(pos);
             }
         }
-        //this.state.map.on('click', this.addMarker.bind(this));
+        this.state.map.on('click', this.addMarker.bind(this));
     }
 
     markersToPos(){
         var markers = this.state.markers;
         var positions = markers.map((marker) => marker._latlng);
         this.setState({positions:positions});
+    }
+
+    prepareMarkerForSave(){
+        var markers = this.state.markers2Save;
+        var positions = markers.map((marker) => marker._latlng);
+        this.setState(prevState => ({
+            positions:[...prevState.positions, ...positions],
+            markers2Save: []
+        }));
+        console.log(this.state)
     }
 
     setCurrentPos(){
@@ -65,53 +76,90 @@ class Map extends Component {
     }
 
     addMarker(e) {
-        var marker = this.paintMarker(e.latlng);
+        var marker = this.paintMarker(e.latlng,false);
+        this.setState(prevState => ({
+            markers2Save: [...prevState.markers2Save, marker]
+        }));
     }
 
     addPosMarker(e) {
         if(this.state.curMarker!=null){
             this.state.map.removeLayer(this.state.curMarker);
         }
-        var marker = this.paintMarker(e);
+        var marker = this.paintMarker(e,true);
         this.setState({
             curMarker: marker
             });
     }
 
-    paintMarker(pos){
-
+    removeMarker(marker){
+        marker._map.removeLayer(marker);
+        this.removePointFromPos(marker._latlng)
+        this.removeMarkerFromMarkers(marker)
+        this.removeMarkerFromMarkers2Save(marker);
     }
-    paintMarker(pos) {
+
+    paintMarker(pos,changePos) {
         var markers = this.state.markers;
         var marker = window.L.marker(pos).addTo(this.state.map);
+        if(!changePos){
         marker.on("click", (function(e){
-            e.target._map.removeLayer(e.target);
-            this.removePointFromPos(e.target._latlng)
-            this.removeMarkerFromMarkers(e.target)
-        }).bind(this));
+            console.log(e)
+            console.log(marker)
+            marker.bindPopup((function(e){
+                console.log(e);
+                var inputElement = document.createElement('button');
+                inputElement.type = "button"
+                inputElement.innerHTML= "remove"
+                inputElement.className = "pure-button pure-button-primary button-error"
+                inputElement.stlye= ""
+                inputElement.addEventListener('click', (function(){
+                    this.removeMarker(e);
+                }).bind(this));
+                return inputElement
+            }).bind(this)
+            ).openPopup();
+            // e.target._map.removeLayer(e.target);
+            //this.removePointFromPos(e.target._latlng)
+            //this.removeMarkerFromMarkers(e.target)
+            //this.removeMarkerFromMarkers2Save(e.target);
+            }).bind(this));
+        } else {
+            marker.on("click", (function(e){
+                return true;
+            }));
+        }
         markers.push(marker);
         var posString = pos.lat.toString().substring(0,6)+", "+pos.lng.toString().substring(0,6)
-        this.setState({
+        this.setState(prevState =>({
             point: pos,
-            posString: posString,
+            posString: changePos ? posString : prevState.posString,
             markers: markers
-        })
+        }));
         return marker
     }
     deleteAllMarkers(){
-        var markers = this.state.markers;
-        for(var i=0;i<markers.length;i++) {
-            this.state.map.removeLayer(markers[i]);
-        }  
+        this.state.map.eachLayer((function(layer){
+            if(layer._url === undefined){
+                this.state.map.removeLayer(layer);
+            }
+        }).bind(this));
         this.setState({
             markers: [],
             positions: [],
-            posString: ""
+            posString: "",
+            markers2Save:[]
         },this.saveMarkers);
     }
     removeMarkerFromMarkers(marker){
         this.setState(prevState => ({
             markers: prevState.markers.filter( (t) => { return t!= marker})
+          }))
+    }
+
+    removeMarkerFromMarkers2Save(marker){
+        this.setState(prevState => ({
+            markers: prevState.markers2Save.filter( (t) => { return t!= marker})
           }))
     }
 
@@ -132,6 +180,7 @@ class Map extends Component {
           }))
     }
     savePosition(){
+        this.prepareMarkerForSave();
         this.addPointToPos(this.state.curMarker._latlng)
         this.addMarkerToMarkers(this.state.curMarker);
         this.setState({
