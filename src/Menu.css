@@ -1,0 +1,76 @@
+.custom-restricted-width {
+    /* To limit the menu width to the content of the menu: */
+    display: inline-block;
+    /* Or set the width explicitly: */
+    width: 10em;
+}
+
+.danger >.pure-menu-link:hover{
+    background: rgb(202, 60, 60) !important;
+    color:white !important;
+}
+.danger >.pure-menu-link:focus, .pure-menu-link:active {
+    background-color: transparent !important;
+    color:white !important;
+}
+.toggle >.pure-menu-link:focus .pure-menu-link:active{
+    background-color: transparent !important;
+    color:white !important;
+}
+.selected{
+    background-color: white !important;
+    color:#282c34 !important;
+}
+.menu {
+    position: absolute;
+    z-index: -1!important;
+    right: 0;
+    top: calc(10vh - 10em);
+    height:auto;
+    border-left: 1px solid white;
+    background-color: #282c34;
+    color: white;
+}
+
+.pure-menu-heading {
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    color: white;
+}
+
+.pure-menu-item a {
+    color: white;
+}
+
+.pure-menu-item a:hover {
+    color: #282c34;
+}
+.in{
+    animation:
+        fadeIn 0.3s ease-in forwards normal;
+    animation-iteration-count: 1
+}
+
+.out{
+    animation:
+        fadeOut 0.22s ease-in forwards normal;
+    animation-iteration-count: 1
+
+}
+@keyframes fadeIn {
+    0% {
+        transform: translate(0,0em);
+    }
+    100% {
+        transform: translate(0,10em);
+    }
+}
+
+@keyframes fadeOut {
+    0% {
+        transform: translate(0,10em);
+    }
+    100% {
+        transform: translate(0,0em);
+    }
+}
